@@ -1,0 +1,14 @@
+#ignore all files
+*
+
+#unignore all with extensions and all dirs
+!*.* 
+!*/
+
+test
+test.cpp
+/.vscode
+.DS_Store
+
+*.exe
+*.out
