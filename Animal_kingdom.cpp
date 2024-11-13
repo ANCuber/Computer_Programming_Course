@@ -187,7 +187,7 @@ void RabbitDie() {
         else continue;
         int cx = ListOfR[i]->x;
         int cy = ListOfR[i]->y;
-        if ((MapR[cx][cy].size() >= 5) || (ListOfR[i]->age > 50)) ListOfR[i]->health = 0;
+        if ((MapR[cx][cy].size() >= 10) || (ListOfR[i]->age > 50)) ListOfR[i]->health = 0;
     }
     int tmpnR = nRabbit;
     for (int i = 0, cnt = 0; cnt < tmpnR; ++i) {
