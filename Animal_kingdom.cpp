@@ -52,6 +52,12 @@ public:
      * or is doesn't move; use rand() % 5.
      * Its age and health change, too
      */
+    void UpdateEachDay() {
+        int rd = rand()%5;
+        x += dx[rd]+100, y += dy[rd]+400;
+        x %= 100, y %= 400;
+        age++, health--;
+    }
 };
 
 class Rabbit : public Animal {
@@ -78,13 +84,10 @@ public:
         pqr.pop();
         return tmp < pos;
     }
-    void UpdateEachDay() {
-        int rd = rand()%5;
+    void UpdateRabbit() {
         MapR[x][y].erase(id);
-        x += dx[rd]+100, y += dy[rd]+400;
-        x %= 100, y %= 400;
+        UpdateEachDay();
         MapR[x][y].insert(id);
-        age++, health--;
     }
 };
 
@@ -116,12 +119,6 @@ public:
             ListOfR[i]->health = 0;
         }
     }
-    void UpdateEachDay() {
-        int rd = rand()%5;
-        x += dx[rd]+100, y += dy[rd]+400;
-        x %= 100, y %= 400;
-        age++, health--;
-    }
 };
 
 void InitializeAnimals() {
@@ -143,7 +140,7 @@ void AnimalMove() {
     for (int i = 0, cnt = 0; cnt < nRabbit; ++i) {
         if (usingr[i]) cnt++;
         else continue;
-        ListOfR[i]->UpdateEachDay();
+        ListOfR[i]->UpdateRabbit();
     }
     for (int i = 0, cnt = 0; cnt < nTiger; ++i) {
         if (usingt[i]) cnt++;
