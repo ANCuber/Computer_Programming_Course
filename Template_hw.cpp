@@ -27,8 +27,16 @@ public:
                 if (coef[i] > 0) ret += "+";
                 else ret += "-";
             }
-            if (i) ret += (to_string(abs(coef[i]))+x+"^"+to_string(i));
-            else ret += (to_string(abs(coef[i])));
+            if (coef[i] == 1) {
+                string s(1,x);
+                if (i > 1) ret += (s+"^"+to_string(i));
+                else if (i == 1) ret += (s);
+                else ret += to_string(1);
+            } else {
+                if (i > 1) ret += (to_string(abs(coef[i]))+x+"^"+to_string(i));
+                else if (i == 1) ret += (to_string(abs(coef[i]))+x);
+                else ret += (to_string(abs(coef[i])));
+            }
         }
         if (ret.empty()) return "0";
         return ret;
@@ -153,10 +161,10 @@ ostream& operator<<(ostream& mos, Matrix<T, Row, Column> mat) {
 int main() {
     srand(time(NULL));
     Matrix<int, 2, 2> A;
-    A[0][0] = 3;//rand() % 100;
-    A[0][1] = 4;//rand() % 100;
-    A[1][0] = 5;//rand() % 100;
-    A[1][1] = 6;//rand() % 100;
+    A[0][0] = rand() % 100;
+    A[0][1] = rand() % 100;
+    A[1][0] = rand() % 100;
+    A[1][1] = rand() % 100;
     cout << "Matrix A is" << endl;
     cout << A << endl;
     Polynomial poly = A.char_poly();
