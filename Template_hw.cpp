@@ -5,7 +5,7 @@ using namespace std;
 #define ll long long
 #define pb push_back
 
-const int sz = 5;
+const int sz = 2;
 
 // Polynomial
 template <typename T, int Deg>
