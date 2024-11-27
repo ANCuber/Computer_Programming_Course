@@ -5,14 +5,17 @@ using namespace std;
 #define ll long long
 #define pb push_back
 
+const int sz = 5;
+
 // Polynomial
 template <typename T, int Deg>
 class Polynomial{
 public:
     T coef[Deg+1];
 
-    Polynomial() {
-        for (int i = 0; i <= Deg; ++i) coef[i] = 0;
+    Polynomial() {}
+    Polynomial(int val) {
+        for (int i = 0; i <= Deg; ++i) coef[i] = val;
     }
     
     T& operator[](int i) {
@@ -20,14 +23,17 @@ public:
     }
 
     string operator()(char x) {
+        cout << "P:";
+        for (int i = Deg; i >= 0; --i) cout << ' ' << coef[i];
+        cout << endl;
+        
         string ret = "";
         for (int i = Deg; i >= 0; --i) {
             if (!coef[i]) continue;
-            if (!ret.empty()) {
-                if (coef[i] > 0) ret += "+";
-                else ret += "-";
-            }
-            if (coef[i] == 1) {
+            if (!ret.empty() && coef[i] > 0) ret += "+";
+            else if (coef[i] < 0) ret += "-";
+            
+            if (abs(coef[i]) == 1) {
                 string s(1,x);
                 if (i > 1) ret += (s+"^"+to_string(i));
                 else if (i == 1) ret += (s);
@@ -60,10 +66,10 @@ public:
     T arr[Row*Column];
 
     Matrix() {}
-    Matrix(int val) {
+    Matrix(T val) {
         for (int i = 0; i < Row; ++i)
             for (int j = 0; j < Column; ++j)
-                arr[i*Row+j] = (i == j)?val:0;
+                arr[i*Row+j] = (i == j)?val:T(0);
     }
     
     class SingleRow{
@@ -81,21 +87,41 @@ public:
     }
 
     T det() {
-        if (Row == 1) return arr[0];
-        else if (Row == 2) return arr[0]*arr[3]-arr[1]*arr[2];
+        if constexpr (Row == 1) return arr[0];
+        else if constexpr (Row == 2) return arr[0]*arr[3]-arr[1]*arr[2];
+        else {
+            T ret = T(0);
+            for (int col = 0; col < Row; ++col) {
+                // Create submatrix
+                Matrix<T, Row-1, Column-1>  submat;
+                for (int i = 1; i < Row; ++i) {
+                    int subCol = 0;
+                    for (int j = 0; j < Row; ++j) {
+                        if (j == col) continue;
+                        submat[i - 1][subCol++] = arr[i*Row+j];
+                    }
+                }
+                // Recursive call
+                ret = ret+(col % 2 == 0 ? 1 : -1) * arr[col] * submat.det();
+            }
+            return ret;
+        }
     }
     
-    T tr() {
-        T sum = T(0);
-        for (int i = 0; i < Row; ++i) sum = sum+arr[i*Row+i];
-        return sum;
-    }
-
     Polynomial<T, Row> char_poly() {
-        Polynomial<T, Row> ret;
-        ret[2] = 1;
-        ret[1] = -tr();
-        ret[0] = det();
+        Polynomial<T, Row> ret(0);
+        Matrix<Polynomial<T, Row>, Row, Column> mat(Polynomial<T, Row>(0));
+        for (int i = 0; i < Row; ++i) {
+            for (int j = 0; j < Row; ++j) {
+                if (i == j) {
+                    mat[i][j][0] = -1*arr[i*Row+j];
+                    mat[i][j][1] = T(1);
+                } else {
+                    mat[i][j][0] = -1*arr[i*Row+j];
+                }
+            }
+        }
+        ret = mat.det();
         return ret;
     }
 };
@@ -158,13 +184,54 @@ ostream& operator<<(ostream& mos, Matrix<T, Row, Column> mat) {
     return mos;
 }
 
+// Polynomial operators
+template <typename T, int Deg>
+Polynomial<T, Deg> operator+(Polynomial<T, Deg> A, Polynomial<T, Deg> B) {
+    Polynomial<T, Deg> ret(0);
+    for (int i = 0; i <= Deg; ++i) ret[i] = A[i]+B[i];
+    return ret;
+}
+
+template <typename T, int Deg>
+Polynomial<T, Deg> operator-(Polynomial<T, Deg> A, Polynomial<T, Deg> B) {
+    Polynomial<T, Deg> ret(0);
+    for (int i = 0; i <= Deg; ++i) ret[i] = A[i]-B[i];
+    return ret;
+}
+
+template <typename T, int Deg>
+Polynomial<T, Deg> operator*(Polynomial<T, Deg> A, T c) {
+    Polynomial<T, Deg> ret(0);
+    for (int i = 0; i <= Deg; ++i) ret[i] = c*A[i];
+    return ret;
+}
+
+template <typename T, int Deg>
+Polynomial<T, Deg> operator*(T c, Polynomial<T, Deg> A) {
+    return A*c;
+}
+
+template <typename T, int Deg>
+Polynomial<T, Deg> operator*(Polynomial<T, Deg> A, Polynomial<T, Deg> B) {
+    Polynomial<T, Deg> ret(0);
+    for (int i = 0; i <= Deg; ++i) {
+        for (int j = 0; j <= Deg; ++j) {
+            if (i+j <= Deg) {
+                ret[i+j] += A[i]*B[j];
+            }
+        }
+    }
+    return ret;
+}
+
 int main() {
     srand(time(NULL));
-    Matrix<int, 2, 2> A;
-    A[0][0] = rand() % 100;
-    A[0][1] = rand() % 100;
-    A[1][0] = rand() % 100;
-    A[1][1] = rand() % 100;
+    Matrix<int, sz, sz> A;
+    for (int i = 0; i < sz; ++i) {
+        for (int j = 0; j < sz; ++j) {
+            A[i][j] = rand()%100;
+        }
+    }
     cout << "Matrix A is" << endl;
     cout << A << endl;
     Polynomial poly = A.char_poly();
@@ -176,3 +243,4 @@ int main() {
     cout << "P(A) is " << endl;
     cout << poly(A) << endl;
 }
+
